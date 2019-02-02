@@ -142,6 +142,102 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+        #recursively call explain
+        if (isinstance(fact_or_rule, Fact) == False) and (isinstance(fact_or_rule, Rule) == False): #not a fact or a rule
+            return False
+        elif (fact_or_rule not in self.facts) and (fact_or_rule not in self.rules): #not in kb
+            if isinstance(fact_or_rule, Fact):  
+                return "Fact is not in the KB"
+            else:
+                return "Rule is not in the KB"
+        else:
+            indent = '\n  '
+            if isinstance(fact_or_rule, Fact): #fact
+                s = "fact: (" 
+                fact = self._get_fact(fact_or_rule)
+                s += fact.statement.predicate  # add the left hand side
+                for t in fact.statement.terms:  #add right hand side
+                    s += ' ' + str(t)
+                s += ')'
+                if len(fact_or_rule.supported_by) != 0:
+                    for pair in fact_or_rule.supported_by:
+                        s += indent + "SUPPORTED BY"
+                        for fr in pair:
+                            s += self.explain_helper(fr, indent)
+            else: #rule
+                s = "  rule: ("
+                rule = self._get_rule(fact_or_rule)
+                for statement in rule.lhs:  
+                    s += '('  
+                    s += statement.predicate  
+                    for t in statement.terms:  
+                        s += ' ' + str(t)
+                    s += '), '  
+                del s[-1]
+                del s[-1] #remove comma and extra space at the end
+                s += ') -> ('  #transition into right hand side
+                s += rule.rhs.predicate  
+                for t in rule.rhs.terms:  
+                    s += ' ' + str(t)
+                s += ')' 
+                if len(rule.supported_by) != 0:
+                    for pair in rule.supported_by:
+                        s += indent + 'SUPPORTED BY'
+                        for fr in pair:
+                            s += self.explain_helper(fr, indent)
+            return s
+                
+
+
+    def explain_helper(self, fact_or_rule, recurse): 
+        s = recurse + "  " #add two spaces every time we go deeper into supported_by
+        if (isinstance(fact_or_rule, Fact) == False) and (isinstance(fact_or_rule, Rule) == False): #not a fact or a rule
+            return False
+        elif (fact_or_rule not in self.facts) and (fact_or_rule not in self.rules): #not in kb
+            if isinstance(fact_or_rule, Fact):  
+                return "Fact is not in the KB"
+            else:
+                return "Rule is not in the KB"
+        else:
+            indent = '\n  '
+            if isinstance(fact_or_rule, Fact): #fact
+                s += "fact: (" 
+                fact = self._get_fact(fact_or_rule)
+                s += fact.statement.predicate  # add the left hand side
+                for t in fact.statement.terms:  #add right hand side
+                    s += ' ' + str(t)
+                s += ')'
+                if fact.asserted: 
+                    s += ' ASSERTED'
+                if len(fact_or_rule.supported_by) != 0:
+                    for pair in fact_or_rule.supported_by:
+                        s += indent + "SUPPORTED BY"
+                        for fr in pair:
+                            s += self.explain_helper(fr, indent)
+            else: #rule
+                s = "  rule: ("
+                rule = self._get_rule(fact_or_rule)
+                for statement in rule.lhs:  
+                    s += '('  
+                    s += statement.predicate  
+                    for t in statement.terms:  
+                        s += ' ' + str(t)
+                    s += '), '  
+                del s[-1]
+                del s[-1] #remove comma and extra space at the end
+                s += ') -> ('  #transition into right hand side
+                s += rule.rhs.predicate  
+                for t in rule.rhs.terms:  
+                    s += ' ' + str(t)
+                s += ')' 
+                if rule.asserted: 
+                    s += ' ASSERTED'
+                if len(rule.supported_by) != 0:
+                    for pair in rule.supported_by:
+                        s += indent + 'SUPPORTED BY'
+                        for fr in pair:
+                            s += self.explain_helper(fr, indent)
+            return s
 
 
 class InferenceEngine(object):
