@@ -159,13 +159,15 @@ class KnowledgeBase(object):
                 for t in fact.statement.terms:  #add right hand side
                     s += ' ' + str(t)
                 s += ')'
+                if fact.asserted: 
+                    s += ' ASSERTED'
                 if len(fact_or_rule.supported_by) != 0:
                     for pair in fact_or_rule.supported_by:
                         s += indent + "SUPPORTED BY"
                         for fr in pair:
                             s += self.explain_helper(fr, indent)
             else: #rule
-                s = "  rule: ("
+                s = "rule: ("
                 rule = self._get_rule(fact_or_rule)
                 for statement in rule.lhs:  
                     s += '('  
@@ -173,13 +175,14 @@ class KnowledgeBase(object):
                     for t in statement.terms:  
                         s += ' ' + str(t)
                     s += '), '  
-                del s[-1]
-                del s[-1] #remove comma and extra space at the end
+                s = s[:(len(s)-2)]
                 s += ') -> ('  #transition into right hand side
                 s += rule.rhs.predicate  
                 for t in rule.rhs.terms:  
                     s += ' ' + str(t)
                 s += ')' 
+                if rule.asserted: 
+                    s += ' ASSERTED'
                 if len(rule.supported_by) != 0:
                     for pair in rule.supported_by:
                         s += indent + 'SUPPORTED BY'
@@ -199,7 +202,7 @@ class KnowledgeBase(object):
             else:
                 return "Rule is not in the KB"
         else:
-            indent = '\n  '
+            indent = recurse + "    "
             if isinstance(fact_or_rule, Fact): #fact
                 s += "fact: (" 
                 fact = self._get_fact(fact_or_rule)
@@ -215,7 +218,7 @@ class KnowledgeBase(object):
                         for fr in pair:
                             s += self.explain_helper(fr, indent)
             else: #rule
-                s = "  rule: ("
+                s += "rule: ("
                 rule = self._get_rule(fact_or_rule)
                 for statement in rule.lhs:  
                     s += '('  
@@ -223,8 +226,7 @@ class KnowledgeBase(object):
                     for t in statement.terms:  
                         s += ' ' + str(t)
                     s += '), '  
-                del s[-1]
-                del s[-1] #remove comma and extra space at the end
+                s = s[:(len(s)-2)]
                 s += ') -> ('  #transition into right hand side
                 s += rule.rhs.predicate  
                 for t in rule.rhs.terms:  
